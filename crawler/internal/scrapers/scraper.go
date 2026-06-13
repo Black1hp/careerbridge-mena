@@ -9,7 +9,8 @@ import (
 type Scraper struct {
 	Name    string
 	BaseURL string
-.browser playwright.Browser
+pw      *playwright.Playwright
+	browser playwright.Browser
 	page    playwright.Page
 }
 
@@ -41,6 +42,9 @@ func (s *Scraper) Launch(ctx context.Context) error {
 func (s *Scraper) Close() {
 	if s.browser != nil {
 		s.browser.Close()
+	}
+	if s.pw != nil {
+		s.pw.Stop()
 	}
 }
 

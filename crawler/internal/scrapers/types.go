@@ -2,6 +2,7 @@ package scrapers
 
 import (
 	"fmt"
+	"strings"
 	"time"
 )
 
@@ -71,16 +72,7 @@ func GuessCountry(text string) string {
 }
 
 func containsIgnoreCase(s, substr string) bool {
-	return len(s) >= len(substr) && (s == substr || len(s) > 0 && containsFold(s, substr))
-}
-
-func containsFold(s, substr string) bool {
-	for i := 0; i <= len(s)-len(substr); i++ {
-		if s[i:i+len(substr)] == substr {
-			return true
-		}
-	}
-	return false
+	return strings.Contains(strings.ToLower(s), strings.ToLower(substr))
 }
 
 func DebugLog(source, msg string, args ...any) {

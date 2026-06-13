@@ -148,8 +148,8 @@ func Search(ctx context.Context, req SearchRequest) (*SearchResult, error) {
 	searchResult, err := Client.Search().
 		Index(indexName).
 		Query(q).
-		Sort("deadline", true).
 		Sort("_score", false).
+		Sort("deadline", true).
 		From(from).
 		Size(req.Limit).
 		Do(ctx)

@@ -29,6 +29,7 @@ func main() {
 	api.HandleFunc("/opportunities/{id}", handlers.GetOpportunity).Methods("GET")
 	api.HandleFunc("/countries", handlers.GetCountries).Methods("GET")
 	api.HandleFunc("/ingest", handlers.IngestOpportunities).Methods("POST")
+	api.HandleFunc("/healthz", handlers.HealthCheck).Methods("GET")
 
 	port := os.Getenv("PORT")
 	if port == "" {

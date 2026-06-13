@@ -12,6 +12,17 @@ import (
 	"github.com/gorilla/mux"
 )
 
+func HealthCheck(w http.ResponseWriter, r *http.Request) {
+	dbOK := database.Pool.Ping(r.Context()) == nil
+	w.Header().Set("Content-Type", "application/json")
+	if dbOK {
+		json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
+	} else {
+		w.WriteHeader(http.StatusServiceUnavailable)
+		json.NewEncoder(w).Encode(map[string]string{"status": "db unreachable"})
+	}
+}
+
 func SearchOpportunities(w http.ResponseWriter, r *http.Request) {
 	page, _ := strconv.Atoi(r.URL.Query().Get("page"))
 	if page < 1 {
@@ -101,6 +112,8 @@ type IngestRequest struct {
 }
 
 func IngestOpportunities(w http.ResponseWriter, r *http.Request) {
+	r.Body = http.MaxBytesReader(w, r.Body, 10<<20)
+
 	var items []IngestRequest
 	if err := json.NewDecoder(r.Body).Decode(&items); err != nil {
 		http.Error(w, "invalid JSON", http.StatusBadRequest)
@@ -109,6 +122,13 @@ func IngestOpportunities(w http.ResponseWriter, r *http.Request) {
 
 	var inserted int
 	for _, item := range items {
+		if item.Title == "" || item.URL == "" {
+			continue
+		}
+		if item.Type != "scholarship" && item.Type != "internship" && item.Type != "competition" {
+			item.Type = "scholarship"
+		}
+
 		var deadline *time.Time
 		if item.Deadline != nil {
 			t, err := time.Parse("2006-01-02", *item.Deadline)
